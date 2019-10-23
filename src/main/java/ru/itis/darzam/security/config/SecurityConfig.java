@@ -9,8 +9,11 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.itis.darzam.security.filter.JWTFilter;
+import ru.itis.darzam.security.filter.JwtAuthenticationEntryPoint;
 import ru.itis.darzam.security.provider.JWTTokenProvider;
 
 import java.util.Collections;
@@ -21,6 +24,7 @@ import java.util.Collections;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   private final JWTTokenProvider jwtProvider;
+  private final JwtAuthenticationEntryPoint entryPoint;
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
@@ -37,6 +41,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests().antMatchers("/auth").permitAll()
             .anyRequest().authenticated()
             .and()
+            .exceptionHandling().authenticationEntryPoint(entryPoint)
+            .and()
             .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
   }
 
@@ -46,6 +52,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     filter.setAuthenticationManager(authenticationManager());
     return filter;
   }
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder(4);
+  }
+
 
   @Bean
   protected AuthenticationManager authenticationManager(){

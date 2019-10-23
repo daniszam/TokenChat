@@ -12,6 +12,7 @@ import java.util.Collection;
 public class JWTAuthentication implements Authentication {
 
   private String jwtToken;
+  private boolean authenticated;
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return null;
@@ -30,11 +31,11 @@ public class JWTAuthentication implements Authentication {
   }
 
   public boolean isAuthenticated() {
-    return false;
+    return authenticated;
   }
 
   public void setAuthenticated(boolean b) throws IllegalArgumentException {
-
+    authenticated = b;
   }
 
   public String getName() {

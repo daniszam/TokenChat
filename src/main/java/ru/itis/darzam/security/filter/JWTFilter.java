@@ -22,13 +22,18 @@ public class JWTFilter extends AbstractAuthenticationProcessingFilter {
 
   public Authentication attemptAuthentication(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws AuthenticationException {
     String token = httpServletRequest.getHeader(AUTHENTICATION_HEADER);
-    JWTAuthentication jwtAuthentication = new JWTAuthentication(token);
+    JWTAuthentication jwtAuthentication = new JWTAuthentication(token, false);
     if (token == null) {
-      jwtAuthentication.setAuthenticated(true);
       return jwtAuthentication;
     }
 
     return getAuthenticationManager()
             .authenticate(jwtAuthentication);
+  }
+
+  @Override
+  protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+    super.successfulAuthentication(request, response, chain, authResult);
+    chain.doFilter(request, response);
   }
 }
