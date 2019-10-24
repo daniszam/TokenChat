@@ -27,8 +27,7 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public JwtToken createToken(UserForm userForm) throws AuthException {
-        User user = userService.getUserByForm(userForm);
-        UserDetailsImpl userDetails = new UserDetailsImpl(user);
+        UserDetails userDetails = userService.loadUserByUsername(userForm.getUsername());
         return jwtFactory.createToken(userDetails);
     }
 

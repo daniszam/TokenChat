@@ -2,8 +2,11 @@ package ru.itis.darzam.security.filter;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import ru.itis.darzam.security.authentication.JWTAuthentication;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -13,27 +16,25 @@ import java.io.IOException;
 
 public class JWTFilter extends AbstractAuthenticationProcessingFilter {
 
-  private static final String AUTHENTICATION_PATH = "/chat";
-  private static final String AUTHENTICATION_HEADER = "Authorize";
+    private final TokenExtractor tokenExtractor;
 
-  public JWTFilter() {
-    super(AUTHENTICATION_PATH);
-  }
-
-  public Authentication attemptAuthentication(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws AuthenticationException {
-    String token = httpServletRequest.getHeader(AUTHENTICATION_HEADER);
-    JWTAuthentication jwtAuthentication = new JWTAuthentication(token, false);
-    if (token == null) {
-      return jwtAuthentication;
+    public JWTFilter(RequestMatcher matcher, TokenExtractor tokenExtractor) {
+        super(matcher);
+        this.tokenExtractor = tokenExtractor;
     }
 
-    return getAuthenticationManager()
-            .authenticate(jwtAuthentication);
-  }
+    public Authentication attemptAuthentication(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws AuthenticationException {
+        Authentication authentication = tokenExtractor.extract(httpServletRequest);
 
-  @Override
-  protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-    super.successfulAuthentication(request, response, chain, authResult);
-    chain.doFilter(request, response);
-  }
+        return getAuthenticationManager()
+                .authenticate(authentication);
+    }
+
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authResult);
+        SecurityContextHolder.setContext(context);
+        chain.doFilter(request, response);
+    }
 }

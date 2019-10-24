@@ -13,6 +13,7 @@ import java.util.Collection;
 public class UserDetailsImpl implements UserDetails {
 
     private User user;
+    private Collection<? extends GrantedAuthority> grantedAuthorities;
 
 
     public UserDetailsImpl(User user) {
@@ -21,7 +22,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return grantedAuthorities;
     }
 
     @Override

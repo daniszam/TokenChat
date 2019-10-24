@@ -1,6 +1,7 @@
 package ru.itis.darzam.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,6 +14,7 @@ import ru.itis.darzam.security.model.UserDetailsImpl;
 import ru.itis.darzam.security.model.UserForm;
 
 import javax.security.auth.message.AuthException;
+import java.util.Collections;
 import java.util.Optional;
 
 @Service
@@ -37,8 +39,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username)  {
         Optional<User> user = userRepository.findUserByUsername(username);
-        return new UserDetailsImpl(user.orElse(new User()));
+        UserDetailsImpl userDetails = new UserDetailsImpl(user.orElse(null));
+        userDetails.setGrantedAuthorities(Collections.singleton(new SimpleGrantedAuthority("ADMIN")));
+        return userDetails;
     }
 }

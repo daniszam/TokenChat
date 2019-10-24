@@ -13,6 +13,7 @@ import javax.security.auth.message.AuthException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
@@ -20,8 +21,8 @@ public class JWTFactory {
 
   @Value("${secret: secret}")
   private String secret;
-  @Value("${access.lifeTime: 10000}")
-  private Integer lifeTimeInMs;
+  @Value("${access.lifeTime: 5}")
+  private Integer lifeTimeInMin;
   @Value("${refresh.lifeTime: 10000}")
   private Integer refreshLifeTimeInMs;
 
@@ -29,13 +30,15 @@ public class JWTFactory {
 
     Claims claims = Jwts.claims()
             .setSubject(userDetails.getUsername());
-
-    claims.put("role", userDetails.getAuthorities());
+    claims.put("scopes", userDetails.getAuthorities()
+            .stream()
+            .map(Object::toString)
+            .collect(Collectors.toList()));
 
     Calendar calendar = Calendar.getInstance();
     Date now = new Date();
     calendar.setTime(now);
-    calendar.add(Calendar.MILLISECOND, lifeTimeInMs);
+    calendar.add(Calendar.MINUTE, lifeTimeInMin);
 
     String accessToken = Jwts.builder()
             .setClaims(claims)
