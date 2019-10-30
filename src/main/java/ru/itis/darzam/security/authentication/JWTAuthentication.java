@@ -46,6 +46,6 @@ public class JWTAuthentication implements Authentication {
   }
 
   public String getName() {
-    return null;
+    return principal;
   }
 }

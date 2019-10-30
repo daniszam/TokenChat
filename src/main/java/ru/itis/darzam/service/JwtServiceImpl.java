@@ -7,10 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-import ru.itis.darzam.enitity.User;
-import ru.itis.darzam.security.jwtTokenFactory.JWTFactory;
+import ru.itis.darzam.security.util.JWTFactory;
 import ru.itis.darzam.security.model.JwtToken;
-import ru.itis.darzam.security.model.UserDetailsImpl;
 import ru.itis.darzam.security.model.UserForm;
 
 import javax.security.auth.message.AuthException;

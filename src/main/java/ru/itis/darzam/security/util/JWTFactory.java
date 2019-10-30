@@ -1,4 +1,4 @@
-package ru.itis.darzam.security.jwtTokenFactory;
+package ru.itis.darzam.security.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

@@ -6,8 +6,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.util.matcher.RequestMatcher;
-import ru.itis.darzam.security.authentication.JWTAuthentication;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -32,10 +30,11 @@ public class JWTFilter extends AbstractAuthenticationProcessingFilter {
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-//        SecurityContext context = SecurityContextHolder.createEmptyContext();
-//        context.setAuthentication(authResult);
-//        SecurityContextHolder.setContext(context);
-        super.successfulAuthentication(request, response, chain, authResult);
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authResult);
+        SecurityContextHolder.setContext(context);
+
+//        super.successfulAuthentication(request, response, chain, authResult);
         chain.doFilter(request, response);
     }
 }
