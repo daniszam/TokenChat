@@ -15,7 +15,7 @@ import java.util.Collection;
 @Setter
 public class JWTAuthentication implements Authentication {
 
-  private String jwtToken;
+  private String token;
   private boolean authenticated;
   private Collection<? extends GrantedAuthority> grantedAuthorities;
   private String subject;
@@ -33,7 +33,7 @@ public class JWTAuthentication implements Authentication {
   }
 
   public Object getPrincipal() {
-    return null;
+    return token;
   }
 
   public boolean isAuthenticated() {
@@ -42,6 +42,14 @@ public class JWTAuthentication implements Authentication {
 
   public void setAuthenticated(boolean b) throws IllegalArgumentException {
     authenticated = b;
+  }
+
+  public static JWTAuthentication create (Object principal) {
+    return new JWTAuthentication((String) principal);
+  }
+
+  protected JWTAuthentication(String principal){
+    this.token = principal;
   }
 
   public String getName() {

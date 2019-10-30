@@ -24,7 +24,7 @@ public class JWTTokenProvider implements AuthenticationProvider {
 
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         JWTAuthentication jwtAuthentication = (JWTAuthentication) authentication;
-        String token = jwtAuthentication.getJwtToken();
+        String token = jwtAuthentication.getToken();
 
         try {
             Claims body = Jwts.parser()
@@ -39,7 +39,7 @@ public class JWTTokenProvider implements AuthenticationProvider {
             jwtAuthentication.setSubject(body.getSubject());
 
         } catch (ExpiredJwtException e){
-            throw e;
+            throw new BadCredentialsException("Token expired");
         } catch (Exception e) {
            throw new BadCredentialsException("Bad jwt token");
         }

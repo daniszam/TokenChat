@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor;
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.itis.darzam.security.filter.JWTFilter;
@@ -17,6 +18,7 @@ import ru.itis.darzam.security.filter.JwtAuthenticationEntryPoint;
 import ru.itis.darzam.security.provider.JWTTokenProvider;
 import ru.itis.darzam.security.util.SkipPathRequestMatcher;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,24 +27,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    public static final String JWT_TOKEN_HEADER_PARAM = "X-Authorization";
-    public static final String TOKEN_PATH = "/auth";
+    private static final String TOKEN_PATH = "/auth";
+    private static final String[] PERMIT_ALL = { "/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**", TOKEN_PATH};
+    public static final String JWT_TOKEN_HEADER_PARAM = "Authorization";
 
-    private final JWTTokenProvider jwtProvider;
-    private final TokenExtractor tokenExtractor;
     private final JwtAuthenticationEntryPoint entryPoint;
+    private final TokenExtractor tokenExtractor;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
-                .authorizeRequests().antMatchers(
-                "/v2/api-docs",
-                "/configuration/ui",
-                "/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**")
-                .permitAll()
+                .authorizeRequests().antMatchers(PERMIT_ALL).permitAll()
                 .and()
                 .authorizeRequests().antMatchers(TOKEN_PATH).permitAll()
                 .anyRequest().authenticated()
@@ -53,21 +49,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private JWTFilter jwtFilter() {
-        List<String> pathToSkip = Collections.singletonList(TOKEN_PATH);
-        SkipPathRequestMatcher skipPathRequestMatcher = new SkipPathRequestMatcher(pathToSkip, "/**");
+        SkipPathRequestMatcher skipPathRequestMatcher = new SkipPathRequestMatcher(Arrays.asList(PERMIT_ALL), "/**");
         JWTFilter filter = new JWTFilter(skipPathRequestMatcher, tokenExtractor);
-        filter.setAuthenticationManager(authenticationManager());
+        filter.setAuthenticationManager(authenticationManager);
         return filter;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(4);
-    }
-
-
-    @Bean
-    protected AuthenticationManager authenticationManager() {
-        return new ProviderManager(Collections.singletonList(jwtProvider));
     }
 }
