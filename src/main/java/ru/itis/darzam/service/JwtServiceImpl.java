@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import ru.itis.darzam.enitity.User;
 import ru.itis.darzam.security.jwtTokenFactory.JWTFactory;
@@ -19,7 +20,7 @@ import javax.security.auth.message.AuthException;
 public class JwtServiceImpl implements JwtService {
 
     private final JWTFactory jwtFactory;
-    private final UserService userService;
+    private final UserDetailsService userService;
 
     @Value("${secret: secret}")
     private String secret;

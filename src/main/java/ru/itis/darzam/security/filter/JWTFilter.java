@@ -19,8 +19,8 @@ public class JWTFilter extends AbstractAuthenticationProcessingFilter {
 
     private final TokenExtractor tokenExtractor;
 
-    public JWTFilter(RequestMatcher matcher, TokenExtractor tokenExtractor) {
-        super(matcher);
+    public JWTFilter(String securityPath, TokenExtractor tokenExtractor) {
+        super(securityPath);
         this.tokenExtractor = tokenExtractor;
     }
 
@@ -32,10 +32,10 @@ public class JWTFilter extends AbstractAuthenticationProcessingFilter {
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authResult);
-        SecurityContextHolder.setContext(context);
-//        super.successfulAuthentication(request, response, chain, authResult);
+//        SecurityContext context = SecurityContextHolder.createEmptyContext();
+//        context.setAuthentication(authResult);
+//        SecurityContextHolder.setContext(context);
+        super.successfulAuthentication(request, response, chain, authResult);
         chain.doFilter(request, response);
     }
 }

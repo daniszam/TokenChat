@@ -13,6 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor;
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import ru.itis.darzam.security.filter.JWTFilter;
 import ru.itis.darzam.security.filter.JwtAuthenticationEntryPoint;
 import ru.itis.darzam.security.provider.JWTTokenProvider;
@@ -30,6 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String TOKEN_PATH = "/auth";
     private static final String[] PERMIT_ALL = { "/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**", TOKEN_PATH};
     public static final String JWT_TOKEN_HEADER_PARAM = "Authorization";
+    private static final String SECURITY_PATH = "/chat/**";
 
     private final JwtAuthenticationEntryPoint entryPoint;
     private final TokenExtractor tokenExtractor;
@@ -39,8 +43,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests().antMatchers(PERMIT_ALL).permitAll()
-                .and()
-                .authorizeRequests().antMatchers(TOKEN_PATH).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(entryPoint)
@@ -49,8 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private JWTFilter jwtFilter() {
-        SkipPathRequestMatcher skipPathRequestMatcher = new SkipPathRequestMatcher(Arrays.asList(PERMIT_ALL), "/**");
-        JWTFilter filter = new JWTFilter(skipPathRequestMatcher, tokenExtractor);
+        JWTFilter filter = new JWTFilter(SECURITY_PATH, tokenExtractor);
         filter.setAuthenticationManager(authenticationManager);
         return filter;
     }

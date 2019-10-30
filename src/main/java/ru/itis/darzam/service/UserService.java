@@ -7,7 +7,7 @@ import ru.itis.darzam.security.model.UserForm;
 import javax.security.auth.message.AuthException;
 
 
-public interface UserService extends UserDetailsService {
+public interface UserService {
 
     User getUserByForm(UserForm userForm) throws AuthException;
 }

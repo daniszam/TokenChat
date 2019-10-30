@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
@@ -18,7 +19,7 @@ public class JWTAuthentication implements Authentication {
   private String token;
   private boolean authenticated;
   private Collection<? extends GrantedAuthority> grantedAuthorities;
-  private String subject;
+  private String principal;
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return grantedAuthorities;
@@ -33,7 +34,7 @@ public class JWTAuthentication implements Authentication {
   }
 
   public Object getPrincipal() {
-    return token;
+    return principal;
   }
 
   public boolean isAuthenticated() {
@@ -42,14 +43,6 @@ public class JWTAuthentication implements Authentication {
 
   public void setAuthenticated(boolean b) throws IllegalArgumentException {
     authenticated = b;
-  }
-
-  public static JWTAuthentication create (Object principal) {
-    return new JWTAuthentication((String) principal);
-  }
-
-  protected JWTAuthentication(String principal){
-    this.token = principal;
   }
 
   public String getName() {
