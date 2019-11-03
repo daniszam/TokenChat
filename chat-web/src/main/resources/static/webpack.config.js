@@ -1,6 +1,7 @@
 var packageJSON = require('./package.json');
 var path = require('path');
 var webpack = require('webpack');
+var dotenv = require('dotenv-webpack');
 module.exports = {
     devtool: 'source-map',
     entry: './src/index.js',
@@ -14,7 +15,8 @@ module.exports = {
             debug: true}),
         new webpack.DefinePlugin({
             "process.env": {
-                NODE_ENV: JSON.stringify("development")
+                NODE_ENV: JSON.stringify("development"),
+                TOKEN_CHAT_URL: JSON.stringify("http://localhost:8765/auth")
             }
         })
     ],
@@ -24,6 +26,10 @@ module.exports = {
                 test: /\.jsx?$/,
                 loader: 'babel-loader',
                 exclude: /node_modules/
+            },
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader']
             }
         ]
     },
@@ -35,4 +41,4 @@ module.exports = {
             poll: true
         }
     }
-}
+};
