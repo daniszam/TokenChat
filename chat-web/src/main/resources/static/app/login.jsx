@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
-import ReactDom from "react-dom";
 import $ from 'jquery'
+import env from '../enviroment';
 
 class Login extends Component {
 
@@ -26,7 +26,7 @@ class Login extends Component {
 
     getToken() {
         $.ajax({
-            url: "http://localhost:8080/auth",
+            url: env.AUTH_URL,
             method: 'POST',
             contentType: 'application/json',
             dataType: 'json',
@@ -35,9 +35,11 @@ class Login extends Component {
                 'password': this.state.password
             }),
             success: (response) => {
+                localStorage.setItem('accessToken', this.state.token);
                 this.setState({
                     token: response.accessToken
                 });
+                this.props.history.push('/chat');
             },
             error: (response) => {
                 this.setState({
@@ -70,10 +72,11 @@ class Login extends Component {
                                         <label htmlFor="inputPassword">Password</label>
                                     </div>
                                     <button className="btn btn-lg btn-primary btn-block text-uppercase"
-                                            type="button" onClick={this.getToken}>Sign in
+                                            type="submit" onSubmit={this.getToken}>
+                                        Sign in
                                     </button>
                                 </form>
-                                <h1>Token: {this.state.token}</h1>
+                                <a href={env.APP.REGISTRATION}>Sign Up</a>
                             </div>
                         </div>
                     </div>
@@ -83,7 +86,4 @@ class Login extends Component {
     }
 }
 
-ReactDom.render(
-    <Login/>,
-    document.getElementById('react')
-);
+export default Login;
