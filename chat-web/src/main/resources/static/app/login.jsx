@@ -35,7 +35,8 @@ class Login extends Component {
                 'password': this.state.password
             }),
             success: (response) => {
-                localStorage.setItem('accessToken', this.state.token);
+                localStorage.setItem('accessToken', response.accessToken);
+                localStorage.setItem('username', this.state.username);
                 this.setState({
                     token: response.accessToken
                 });
@@ -72,7 +73,7 @@ class Login extends Component {
                                         <label htmlFor="inputPassword">Password</label>
                                     </div>
                                     <button className="btn btn-lg btn-primary btn-block text-uppercase"
-                                            type="submit" onSubmit={this.getToken}>
+                                            type="button" onClick={this.getToken}>
                                         Sign in
                                     </button>
                                 </form>

@@ -21,6 +21,10 @@ public class JWTAuthentication implements Authentication {
   private Collection<? extends GrantedAuthority> grantedAuthorities;
   private String principal;
 
+  public JWTAuthentication(String token){
+    this.token = token;
+  }
+
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return grantedAuthorities;
   }
