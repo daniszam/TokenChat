@@ -9,10 +9,13 @@ class SignUp extends Component {
         super(props);
         this.state = {
             username: '',
-            password: ''
+            password: '',
+            comparePassword: '',
         };
         this.changePassword = this.changePassword.bind(this);
         this.changeUsername = this.changeUsername.bind(this);
+        this.changeComparePassword = this.changeComparePassword.bind(this);
+        this.signUp = this.signUp.bind(this);
     }
 
     changePassword(event) {
@@ -21,6 +24,10 @@ class SignUp extends Component {
 
     changeUsername(event) {
         this.setState({username: event.target.value})
+    }
+
+    changeComparePassword(event) {
+        this.setState({comparePassword: event.target.value})
     }
 
     signUp() {
@@ -32,6 +39,7 @@ class SignUp extends Component {
             data: JSON.stringify({
                 username: this.state.username,
                 password: this.state.password,
+                comparePassword: this.state.comparePassword,
             }),
             success: (response) => {
                 this.props.history.push(env.APP.LOGIN)
@@ -68,12 +76,12 @@ class SignUp extends Component {
                                             <input type="password" className="form-control" id="password"
                                                    placeholder="Password" name="up" value={this.state.password}
                                                    onChange={this.changePassword}/>
-
                                             <input type="password" className="form-control" id="password"
-                                                   placeholder="Password" name="up2"/>
+                                                   placeholder="Password" name="up2" value={this.state.comparePassword}
+                                                   onChange={this.changeComparePassword}/>
                                         </div>
                                         <br/>
-                                        <button className="btn btn-primary" type="submit" onSubmit={this.signUp}>Sign
+                                        <button className="btn btn-primary" type="button" onClick={this.signUp}>Sign
                                             up
                                         </button>
                                     </div>

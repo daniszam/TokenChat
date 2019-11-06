@@ -8,13 +8,13 @@ import java.util.*;
 @Component
 public class MessageServiceImpl implements MessageService {
 
-    private Map<UUID, List<String>> messages = new HashMap<>();
+    private Map<String, List<String>> messages = new HashMap<>();
 
     @Override
     public void addMessage(MessageDTO messageDTO) {
-        List<String> messagesText =messages.getOrDefault(messageDTO.getConversationId(), new ArrayList<>());
+        List<String> messagesText =messages.getOrDefault(messageDTO.getPageId(), new ArrayList<>());
         messagesText.add(messageDTO.getText());
-        messages.put(messageDTO.getConversationId(), messagesText);
+        messages.put(messageDTO.getPageId(), messagesText);
     }
 
     @Override

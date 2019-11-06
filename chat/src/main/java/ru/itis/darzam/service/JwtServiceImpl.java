@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import ru.itis.darzam.security.util.JWTFactory;
 import ru.itis.darzam.security.model.JwtToken;
-import ru.itis.darzam.security.model.UserForm;
+import ru.itis.darzam.dto.UserForm;
 
 import javax.security.auth.message.AuthException;
 

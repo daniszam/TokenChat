@@ -1,7 +1,6 @@
 var packageJSON = require('./package.json');
 var path = require('path');
 var webpack = require('webpack');
-var dotenv = require('dotenv-webpack');
 module.exports = {
     devtool: 'source-map',
     entry: './src/index.js',
@@ -11,6 +10,10 @@ module.exports = {
         filename: 'bundle.js'},
     resolve: {extensions: ['.js', '.jsx']},
     plugins: [
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery"
+        }),
         new webpack.LoaderOptionsPlugin({
             debug: true}),
         new webpack.DefinePlugin({

@@ -23,7 +23,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private static final String TOKEN_PATH = "/auth";
   private static final String[] PERMIT_ALL = {"/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**", TOKEN_PATH, "/api/chat/websocket"};
   public static final String JWT_TOKEN_HEADER_PARAM = "Authorization";
-  private static final String SECURITY_PATH = "/qweqe";
+  private static final String SECURITY_PATH = "/api/chat/long-pooling";
 
   private final JwtAuthenticationEntryPoint entryPoint;
   private final TokenExtractor tokenExtractor;
@@ -36,9 +36,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
             .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
             .and()
-            .exceptionHandling().authenticationEntryPoint(entryPoint);
-//            .and()
-//            .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
+            .exceptionHandling().authenticationEntryPoint(entryPoint)
+            .and()
+            .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
   }
 
   private JWTFilter jwtFilter() {

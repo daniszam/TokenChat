@@ -4,15 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.itis.darzam.enitity.User;
 import ru.itis.darzam.exception.UserNotFoundException;
 import ru.itis.darzam.repository.UserRepository;
 import ru.itis.darzam.security.model.UserDetailsImpl;
-import ru.itis.darzam.security.model.UserForm;
+import ru.itis.darzam.dto.UserForm;
 
 import javax.security.auth.message.AuthException;
 import java.util.Collections;
@@ -37,6 +35,21 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
 
         return user;
+    }
+
+    @Override
+    public User createUserByForm(UserForm userForm) {
+        if (userRepository.findUserByUsername(userForm.getUsername()).isPresent() ||
+                userForm.getPassword().trim().isEmpty() ||
+                !userForm.getPassword().equals(userForm.getComparePassword())) {
+            return null;
+        }
+
+        User user = new User();
+        user.setPassword(passwordEncoder.encode(userForm.getPassword()));
+        user.setUsername(userForm.getUsername());
+
+        return userRepository.save(user);
     }
 
     @Override

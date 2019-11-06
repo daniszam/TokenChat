@@ -7,7 +7,7 @@ class Message extends Component {
     render() {
         return (
             <div >
-                <div className={'card col-md-4 ' + (this.props.isMyMessage ? 'offset-md-1':'offset-md-8') } style={{width: 18 + 'rem'}}>
+                <div className={'card col-md-4 ' + (this.props.isMyMessage ? 'offset-md-8':'offset-md-1') } style={{width: 18 + 'rem'}}>
                     <div className="card-body">
                         <h6 className="card-subtitle mb-2 text-muted">{this.props.from}</h6>
                         <p className="card-text">{this.props.text}</p>

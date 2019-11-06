@@ -10,10 +10,14 @@ class Chat extends Component {
             message: '',
             username: localStorage.getItem('username'),
             ws: undefined,
-            messages : []
+            messages: [],
+            websocketOn: true,
+            pageId: '',
         };
         this.updateMessage = this.updateMessage.bind(this);
         this.sendMessage = this.sendMessage.bind(this);
+        this.changeChatType = this.changeChatType.bind(this);
+        this.connectWebSocket = this.connectWebSocket.bind(this);
     }
 
     exit(props) {
@@ -27,8 +31,47 @@ class Chat extends Component {
         })
     }
 
+    changeChatType(){
+        let websocketOn = !this.state.websocketOn
+        this.setState({
+            websocketOn: websocketOn
+        });
+
+        if (websocketOn) {
+            this.connectWebSocket();
+        } else {
+            this.state.ws.close();
+            this.connectLongPooling();
+        }
+    }
+
+    connectLongPooling(){
+        $.ajax({
+            url: env.LONG_POOLING_CONNECT,
+            method: 'GET',
+            headers: {
+                'Authorization' : localStorage.getItem('accessToken')
+            },
+            contentType: env.APPLICATION_JSON,
+            dataType: 'text',
+            success: (response) => {
+                this.setState({
+                    pageId: response
+                });
+                this.receiveMessage(response);
+            },
+            error: (response) => {
+
+            }
+        })
+    }
+
     componentDidMount() {
-        document.cookie= 'Authorization='+localStorage.getItem('accessToken');
+       this.connectWebSocket();
+    }
+
+    connectWebSocket(){
+        document.cookie = 'Authorization=' + localStorage.getItem('accessToken');
         let ws = new WebSocket(env.WEBSOCKET_URL);
         this.setState({ws: ws});
         ws.onopen = () => {
@@ -36,12 +79,12 @@ class Chat extends Component {
         };
 
         ws.onerror = () => {
-          localStorage.removeItem('accessToken');
-          this.props.history.push(env.APP.LOGIN);
+            localStorage.removeItem('accessToken');
+            this.props.history.push(env.APP.LOGIN);
         };
 
         ws.onclose = () => {
-          console.log('websocket closed');
+            console.log('websocket closed');
         };
 
         ws.onmessage = (response) => {
@@ -62,19 +105,67 @@ class Chat extends Component {
         let message = {
             'text': this.state.message,
             'from': this.state.username,
+            'pageId': this.state.pageId,
         };
-        this.state.ws.send(JSON.stringify(message));
+
+        if (this.state.websocketOn) {
+            this.state.ws.send(JSON.stringify(message));
+        } else {
+            $.ajax({
+                url: env.LONG_POOLING,
+                method: 'POST',
+                data: JSON.stringify(message),
+                headers: {
+                    'Authorization' : localStorage.getItem('accessToken')
+                },
+                contentType: env.APPLICATION_JSON,
+                dataType: 'json',
+            })
+        }
+    }
+
+    receiveMessage() {
+        $.ajax({
+            url: env.LONG_POOLING_MESSAGES + this.state.pageId,
+            method: "GET",
+            dataType: "json",
+            contentType: "application/json",
+            headers: {
+                'Authorization' : localStorage.getItem('accessToken')
+            },
+            success: (response) => {
+                let messages =[];
+                response.forEach((item) => {
+                    messages.push({
+                        from: item.pageId,
+                        text: item.text,
+                        isMyMessage: item.pageId === this.state.pageId,
+                    })
+                });
+                this.setState({
+                    messages: this.state.messages.concat(messages)
+                });
+                this.receiveMessage(this.state.pageId);
+            }
+        })
     }
 
     render() {
         return (
             <div className="container align-middle">
-                {
-                    this.state.messages.map((message) => (
-                        <Message isMyMessage={message.isMyMessage} text={message.text} from={message.from}/>
-                    ))
-                }
-                // input text
+                <div className="checkbox">
+                    <label>
+                        <input type="checkbox" onChange={this.changeChatType} defaultChecked={this.state.websocketOn}/>
+                            WebSocket On
+                    </label>
+                </div>
+                <div className="container">
+                    {
+                        this.state.messages.map((message) => (
+                            <Message isMyMessage={message.isMyMessage} text={message.text} from={message.from}/>
+                        ))
+                    }
+                </div>
                 <div className="input-group">
                     <div className="input-group-prepend">
                 <span className="input-group-text">

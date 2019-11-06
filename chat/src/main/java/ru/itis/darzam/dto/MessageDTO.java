@@ -10,5 +10,5 @@ import java.util.UUID;
 public class MessageDTO {
 
   private String text;
-  private UUID conversationId;
+  private String pageId;
 }

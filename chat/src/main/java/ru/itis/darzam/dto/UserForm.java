@@ -1,4 +1,4 @@
-package ru.itis.darzam.security.model;
+package ru.itis.darzam.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,8 +13,9 @@ public class UserForm {
 
   private String username;
   private String password;
+  private String comparePassword;
 
-  public static UserForm create(String username, String password) {
-    return new UserForm(username, password);
+  public static UserForm create(String username, String password, String comparePassword) {
+    return new UserForm(username, password, comparePassword);
   }
 }
