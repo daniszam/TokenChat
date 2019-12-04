@@ -3,7 +3,7 @@ import env from '../enviroment';
 import Message from "./message";
 import Dialog from "./dialog";
 import SockJS from "sockjs-client"
-import Stomp from "@stomp/stompjs"
+import {Stomp} from "@stomp/stompjs"
 
 
 class Chat extends Component {
@@ -14,15 +14,24 @@ class Chat extends Component {
             message: '',
             username: localStorage.getItem('username'),
             ws: undefined,
-            messages: {},
-            dialogs: [],
+            messages: [],
+            dialogs: [
+                {id: 1, name: "first", messages: []},
+                {id: 2, name: "second", messages: []},
+            ],
+            dialog: undefined,
             websocketOn: true,
             pageId: '',
+            stompClient: undefined
         };
         this.updateMessage = this.updateMessage.bind(this);
         this.sendMessage = this.sendMessage.bind(this);
         this.changeChatType = this.changeChatType.bind(this);
         this.connectWebSocket = this.connectWebSocket.bind(this);
+        this.stompSendMessage = this.stompSendMessage.bind(this);
+        this.stompSubscribe = this.stompSubscribe.bind(this);
+        this.connectStomp = this.connectStomp.bind(this);
+        this.dialogClickEvent = this.dialogClickEvent.bind(this);
     }
 
     exit(props) {
@@ -37,7 +46,7 @@ class Chat extends Component {
     }
 
     changeChatType() {
-        let websocketOn = !this.state.websocketOn
+        let websocketOn = !this.state.websocketOn;
         this.setState({
             websocketOn: websocketOn
         });
@@ -72,20 +81,49 @@ class Chat extends Component {
     }
 
     componentDidMount() {
-        this.connectWebSocket();
+        this.connectStomp();
+        // this.connectWebSocket();
     }
 
     connectStomp() {
         document.cookie = 'Authorization=' + localStorage.getItem('accessToken');
-        let socket = new SockJS('messages');
+        let socket = new SockJS(env.SERVER_URL + env.APP.STOMP_URL);
         let stompClient = Stomp.over(socket);
-        stompClient.connect({}, function (frame) {
+        this.setState({stompClient: stompClient});
+        stompClient.connect({}, (frame) => {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/chat', function (greeting) {
-                console.log('Subscribe to topic/chat');
-
-            });
         });
+    }
+
+    stompSubscribe(dialog) {
+        this.state.stompClient.subscribe('/topic/messages/' + dialog.id, function (message) {
+            console.log('Subscribe to topic/chat');
+            this.state.dialog.messages.concat([{
+                from: message['from'],
+                text: message['text'],
+                isMyMessage: message['from'] === this.state.username,
+            }]);
+            this.state.messages.clear();
+            this.setState({messages: this.dialogs.messages});
+        });
+    }
+
+    stompSendMessage() {
+        let message = {
+            'text': this.state.message,
+            'from': this.state.username,
+        };
+        this.state.stompClient.send("/app/api/chat/stomp/" + this.state.dialog.id, {}, JSON.stringify(message))
+    }
+
+    dialogClickEvent(dialog) {
+        if (this.state.stompClient && this.state.dialog) {
+            this.state.stompClient.unsubscribe('/topic/messages/' + this.state.dialog.id);
+            this.state.dialog.onBlur();
+            this.setState({dialog: dialog});
+            this.state.dialog.changeBackground();
+            this.stompSubscribe(dialog);
+        }
     }
 
     connectWebSocket() {
@@ -174,7 +212,7 @@ class Chat extends Component {
                 <div className="dialogs">
                     {
                         this.state.dialogs.map((dialog) => (
-                           <Dialog name={dialog.name}/>
+                                <Dialog name={dialog.name} id={dialog.id} messages={dialog.messages}/>
                         ))
                     }
                 </div>
@@ -202,7 +240,7 @@ class Chat extends Component {
                         <textarea className="form-control" aria-label="With textarea" value={this.state.message}
                                   onChange={this.updateMessage}>
                     </textarea>
-                        <button className="btn btn-primary" onClick={this.sendMessage}>Send</button>
+                        <button className="btn btn-primary" onClick={this.stompSendMessage}>Send</button>
                     </div>
                     <button type="button" className="btn btn-primary" onClick={event => this.exit(this.props)}>Exit
                     </button>

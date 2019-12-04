@@ -1,6 +1,7 @@
 export default {
     AUTH_URL: 'http://localhost:8080/auth',
     SIGN_UP_URL: 'http://localhost:8080/signUp',
+    SERVER_URL: 'http://localhost:8080',
     APPLICATION_JSON: 'application/json',
     WEBSOCKET_URL: 'ws://localhost:8080/api/chat/websocket',
     LONG_POOLING: 'http://localhost:8080/api/chat/long-pooling',
@@ -10,5 +11,6 @@ export default {
         LOGIN : '/login',
         CHAT : '/chat',
         REGISTRATION : '/registration',
+        STOMP_URL: '/api/chat/websocket'
     }
 }
