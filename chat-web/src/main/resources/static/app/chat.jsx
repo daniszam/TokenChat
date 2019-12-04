@@ -1,6 +1,10 @@
 import React, {Component} from 'react';
 import env from '../enviroment';
 import Message from "./message";
+import Dialog from "./dialog";
+import SockJS from "sockjs-client"
+import Stomp from "@stomp/stompjs"
+
 
 class Chat extends Component {
 
@@ -10,7 +14,8 @@ class Chat extends Component {
             message: '',
             username: localStorage.getItem('username'),
             ws: undefined,
-            messages: [],
+            messages: {},
+            dialogs: [],
             websocketOn: true,
             pageId: '',
         };
@@ -31,7 +36,7 @@ class Chat extends Component {
         })
     }
 
-    changeChatType(){
+    changeChatType() {
         let websocketOn = !this.state.websocketOn
         this.setState({
             websocketOn: websocketOn
@@ -45,12 +50,12 @@ class Chat extends Component {
         }
     }
 
-    connectLongPooling(){
+    connectLongPooling() {
         $.ajax({
             url: env.LONG_POOLING_CONNECT,
             method: 'GET',
             headers: {
-                'Authorization' : localStorage.getItem('accessToken')
+                'Authorization': localStorage.getItem('accessToken')
             },
             contentType: env.APPLICATION_JSON,
             dataType: 'text',
@@ -67,10 +72,23 @@ class Chat extends Component {
     }
 
     componentDidMount() {
-       this.connectWebSocket();
+        this.connectWebSocket();
     }
 
-    connectWebSocket(){
+    connectStomp() {
+        document.cookie = 'Authorization=' + localStorage.getItem('accessToken');
+        let socket = new SockJS('messages');
+        let stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/chat', function (greeting) {
+                console.log('Subscribe to topic/chat');
+
+            });
+        });
+    }
+
+    connectWebSocket() {
         document.cookie = 'Authorization=' + localStorage.getItem('accessToken');
         let ws = new WebSocket(env.WEBSOCKET_URL);
         this.setState({ws: ws});
@@ -116,7 +134,7 @@ class Chat extends Component {
                 method: 'POST',
                 data: JSON.stringify(message),
                 headers: {
-                    'Authorization' : localStorage.getItem('accessToken')
+                    'Authorization': localStorage.getItem('accessToken')
                 },
                 contentType: env.APPLICATION_JSON,
                 dataType: 'json',
@@ -131,10 +149,10 @@ class Chat extends Component {
             dataType: "json",
             contentType: "application/json",
             headers: {
-                'Authorization' : localStorage.getItem('accessToken')
+                'Authorization': localStorage.getItem('accessToken')
             },
             success: (response) => {
-                let messages =[];
+                let messages = [];
                 response.forEach((item) => {
                     messages.push({
                         from: item.pageId,
@@ -152,32 +170,43 @@ class Chat extends Component {
 
     render() {
         return (
-            <div className="container align-middle">
-                <div className="checkbox">
-                    <label>
-                        <input type="checkbox" onChange={this.changeChatType} defaultChecked={this.state.websocketOn}/>
-                            WebSocket On
-                    </label>
-                </div>
-                <div className="container">
+            <div className="container">
+                <div className="dialogs">
                     {
-                        this.state.messages.map((message) => (
-                            <Message isMyMessage={message.isMyMessage} text={message.text} from={message.from}/>
+                        this.state.dialogs.map((dialog) => (
+                           <Dialog name={dialog.name}/>
                         ))
                     }
                 </div>
-                <div className="input-group">
-                    <div className="input-group-prepend">
+                <div className="container align-middle">
+                    <div className="checkbox">
+                        <label>
+                            <input type="checkbox" onChange={this.changeChatType}
+                                   defaultChecked={this.state.websocketOn}/>
+                            WebSocket On
+                        </label>
+                    </div>
+                    <div className="container">
+                        {
+                            this.state.messages.map((message) => (
+                                <Message isMyMessage={message.isMyMessage} text={message.text} from={message.from}/>
+                            ))
+                        }
+                    </div>
+                    <div className="input-group">
+                        <div className="input-group-prepend">
                 <span className="input-group-text">
                     Text
                 </span>
-                    </div>
-                    <textarea className="form-control" aria-label="With textarea" value={this.state.message}
-                              onChange={this.updateMessage}>
+                        </div>
+                        <textarea className="form-control" aria-label="With textarea" value={this.state.message}
+                                  onChange={this.updateMessage}>
                     </textarea>
-                    <button className="btn btn-primary" onClick={this.sendMessage}>Send</button>
+                        <button className="btn btn-primary" onClick={this.sendMessage}>Send</button>
+                    </div>
+                    <button type="button" className="btn btn-primary" onClick={event => this.exit(this.props)}>Exit
+                    </button>
                 </div>
-                <button type="button" className="btn btn-primary" onClick={event => this.exit(this.props)}>Exit</button>
             </div>
         );
     }
