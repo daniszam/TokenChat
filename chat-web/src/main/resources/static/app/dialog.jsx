@@ -23,7 +23,7 @@ class Dialog extends Component {
 
     render() {
         return (
-            <div className="card" style={{backgroundColor: this.state.backgroundColor}}
+            <div className="card" style={{backgroundColor:this.state.active ? "blue" : this.state.backgroundColor}}
                  onMouseEnter={this.changeBackground} onMouseLeave={this.onBlur}>
                 <div className="card-body">
                     <h5 className="card-title">{this.props.name}</h5>
@@ -36,6 +36,7 @@ class Dialog extends Component {
 export default Dialog;
 
 Dialog.propTypes = {
+    active: PropTypes.bool.isRequired,
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     messages: PropTypes.array.isRequired,

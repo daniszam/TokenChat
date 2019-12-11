@@ -11,6 +11,8 @@ export default {
         LOGIN : '/login',
         CHAT : '/chat',
         REGISTRATION : '/registration',
-        STOMP_URL: '/api/chat/websocket'
+        STOMP_URL: '/chat/stomp',
+        STOMP_MESSAGE: '/app/api/dialog',
+        SUBSCRIBE_URL: '/topic/messages'
     }
 }

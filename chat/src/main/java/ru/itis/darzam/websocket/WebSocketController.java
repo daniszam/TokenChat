@@ -1,18 +1,18 @@
 package ru.itis.darzam.websocket;
 
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketMessage;
+import ru.itis.darzam.dto.StomMessageDTO;
 
 @Controller
 public class WebSocketController {
 
-  @MessageMapping("/api/chat/stomp/{chatID}")
-  @SendTo("/topic/messages/{chatId}")
-  public TextMessage send(WebSocketMessage message) {
-    return (TextMessage) message;
+  @MessageMapping("/api/dialog/{chatID}")
+  @SendTo("/topic/messages/{chatID}")
+  public StomMessageDTO send(@DestinationVariable String chatID, StomMessageDTO message) {
+    return message;
   }
 
 }

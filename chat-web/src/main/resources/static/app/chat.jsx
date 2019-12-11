@@ -16,10 +16,11 @@ class Chat extends Component {
             ws: undefined,
             messages: [],
             dialogs: [
-                {id: 1, name: "first", messages: []},
-                {id: 2, name: "second", messages: []},
+                {id: 1, name: "first", active: false, messages: []},
+                {id: 2, name: "second", active: false, messages: []},
             ],
             dialog: undefined,
+            subscription: undefined,
             websocketOn: true,
             pageId: '',
             stompClient: undefined
@@ -96,17 +97,19 @@ class Chat extends Component {
     }
 
     stompSubscribe(dialog) {
-        this.state.stompClient.subscribe('/topic/messages/' + dialog.id, function (message) {
-            console.log('Subscribe to topic/chat');
-            // this.state.dialog.messages.concat([{
-            //     from: message['from'],
-            //     text: message['text'],
-            //     isMyMessage: message['from'] === this.state.username,
-            // }]);
-            this.state.messages.clear();
-            this.setState({dialog: dialog});
-            this.setState({messages: this.state.dialog.messages});
+        this.setState({dialog: dialog});
+        this.setState({messages: dialog.messages});
+        let subscription = this.state.stompClient.subscribe(env.APP.SUBSCRIBE_URL + "/" + dialog.id,  (response) => {
+            let message = JSON.parse(response['body']);
+            this.state.dialog.messages.push({
+                from: message['from'],
+                text: message['text'],
+                isMyMessage: message['from'] === this.state.username,
+            });
+            this.setState({messages : this.state.dialog.messages})
         });
+
+        this.setState({subscription: subscription});
     }
 
     stompSendMessage() {
@@ -114,16 +117,17 @@ class Chat extends Component {
             'text': this.state.message,
             'from': this.state.username,
         };
-        this.state.stompClient.send("/app/api/chat/stomp/" + this.state.dialog.id, {}, JSON.stringify(message))
+        this.state.stompClient.send(env.APP.STOMP_MESSAGE + "/" + this.state.dialog.id, {}, JSON.stringify(message))
     }
 
     dialogClickEvent(dialog) {
-        if (this.state.stompClient) {
-            this.state.stompClient.unsubscribe('/topic/messages/' + dialog.id);
+        if (this.state.subscription) {
+            this.state.subscription.unsubscribe();
+        }
+        if (!this.state.subscription || this.state.stompClient && this.state.dialog && dialog.id !== this.state.dialog.id) {
             this.stompSubscribe(dialog);
-            dialog.onBlur();
+            dialog.active = true;
             this.setState({dialog: dialog});
-            this.state.dialog.changeBackground();
         }
     }
 
@@ -217,7 +221,7 @@ class Chat extends Component {
                                 this.state.dialogs.map((dialog) => (
                                     <div className="dialog" onClick={()=>this.dialogClickEvent(dialog)} onFocus={()=>this.dialogClickEvent(dialog)}>
                                         <Dialog key={dialog.id} name={dialog.name} id={dialog.id}
-                                                messages={dialog.messages}/>
+                                                messages={dialog.messages} active={dialog.active}/>
                                     </div>
                                 ))
                             }
