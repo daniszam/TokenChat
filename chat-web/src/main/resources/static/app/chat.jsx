@@ -98,13 +98,14 @@ class Chat extends Component {
     stompSubscribe(dialog) {
         this.state.stompClient.subscribe('/topic/messages/' + dialog.id, function (message) {
             console.log('Subscribe to topic/chat');
-            this.state.dialog.messages.concat([{
-                from: message['from'],
-                text: message['text'],
-                isMyMessage: message['from'] === this.state.username,
-            }]);
+            // this.state.dialog.messages.concat([{
+            //     from: message['from'],
+            //     text: message['text'],
+            //     isMyMessage: message['from'] === this.state.username,
+            // }]);
             this.state.messages.clear();
-            this.setState({messages: this.dialogs.messages});
+            this.setState({dialog: dialog});
+            this.setState({messages: this.state.dialog.messages});
         });
     }
 
@@ -117,12 +118,12 @@ class Chat extends Component {
     }
 
     dialogClickEvent(dialog) {
-        if (this.state.stompClient && this.state.dialog) {
-            this.state.stompClient.unsubscribe('/topic/messages/' + this.state.dialog.id);
-            this.state.dialog.onBlur();
+        if (this.state.stompClient) {
+            this.state.stompClient.unsubscribe('/topic/messages/' + dialog.id);
+            this.stompSubscribe(dialog);
+            dialog.onBlur();
             this.setState({dialog: dialog});
             this.state.dialog.changeBackground();
-            this.stompSubscribe(dialog);
         }
     }
 
@@ -209,41 +210,52 @@ class Chat extends Component {
     render() {
         return (
             <div className="container">
-                <div className="dialogs">
-                    {
-                        this.state.dialogs.map((dialog) => (
-                                <Dialog name={dialog.name} id={dialog.id} messages={dialog.messages}/>
-                        ))
-                    }
-                </div>
-                <div className="container align-middle">
-                    <div className="checkbox">
-                        <label>
-                            <input type="checkbox" onChange={this.changeChatType}
-                                   defaultChecked={this.state.websocketOn}/>
-                            WebSocket On
-                        </label>
-                    </div>
-                    <div className="container">
-                        {
-                            this.state.messages.map((message) => (
-                                <Message isMyMessage={message.isMyMessage} text={message.text} from={message.from}/>
-                            ))
-                        }
-                    </div>
-                    <div className="input-group">
-                        <div className="input-group-prepend">
-                <span className="input-group-text">
-                    Text
-                </span>
+                <div className="row">
+                    <div className="col">
+                        <div className="dialogs">
+                            {
+                                this.state.dialogs.map((dialog) => (
+                                    <div className="dialog" onClick={()=>this.dialogClickEvent(dialog)} onFocus={()=>this.dialogClickEvent(dialog)}>
+                                        <Dialog key={dialog.id} name={dialog.name} id={dialog.id}
+                                                messages={dialog.messages}/>
+                                    </div>
+                                ))
+                            }
                         </div>
-                        <textarea className="form-control" aria-label="With textarea" value={this.state.message}
-                                  onChange={this.updateMessage}>
-                    </textarea>
-                        <button className="btn btn-primary" onClick={this.stompSendMessage}>Send</button>
                     </div>
-                    <button type="button" className="btn btn-primary" onClick={event => this.exit(this.props)}>Exit
-                    </button>
+                    <div className="col-8">
+                        <div className="container align-middle">
+                            {/*<div className="checkbox">*/}
+                            {/*    <label>*/}
+                            {/*        <input type="checkbox" onChange={this.changeChatType}*/}
+                            {/*               defaultChecked={this.state.websocketOn}/>*/}
+                            {/*        WebSocket On*/}
+                            {/*    </label>*/}
+                            {/*</div>*/}
+                            <div className="container">
+                                {
+                                    this.state.messages.map((message) => (
+                                        <Message isMyMessage={message.isMyMessage} text={message.text}
+                                                 from={message.from}/>
+                                    ))
+                                }
+                            </div>
+                            <div className="input-group">
+                                <div className="input-group-prepend">
+                                    <span className="input-group-text">
+                                        Text
+                                    </span>
+                                </div>
+                                <textarea className="form-control" aria-label="With textarea" value={this.state.message}
+                                          onChange={this.updateMessage}>
+                                 </textarea>
+                                <button className="btn btn-primary" onClick={this.stompSendMessage}>Send</button>
+                            </div>
+                            <button type="button" className="btn btn-primary"
+                                    onClick={event => this.exit(this.props)}>Exit
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         );

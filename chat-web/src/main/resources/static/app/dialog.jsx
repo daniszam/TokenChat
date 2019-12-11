@@ -7,13 +7,13 @@ class Dialog extends Component {
         super(props);
         this.state = {
             backgroundColor: '#ededed'
-        }
+        };
 
         this.changeBackground = this.changeBackground.bind(this);
         this.onBlur = this.onBlur.bind(this);
     }
 
-    changeBackground(){
+    changeBackground() {
         this.setState({backgroundColor: "blue"})
     }
 
@@ -23,10 +23,10 @@ class Dialog extends Component {
 
     render() {
         return (
-            <div className="card w-50" style={{backgroundColor: this.state.backgroundColor}}
-                 onFocus={this.changeBackground} onBlur={this.onBlur}>
-                <div className="card-body" onFocus={this.changeBackground}>
-                    <h5 className="card-title" onFocus={this.changeBackground}>{this.props.name}</h5>
+            <div className="card" style={{backgroundColor: this.state.backgroundColor}}
+                 onMouseEnter={this.changeBackground} onMouseLeave={this.onBlur}>
+                <div className="card-body">
+                    <h5 className="card-title">{this.props.name}</h5>
                 </div>
             </div>
         )
