@@ -1,0 +1,38 @@
+version: '3'
+
+networks:
+  token-chat:
+    external: true
+
+services:
+  zuul:
+    image: zuul
+    ports:
+      - "8080:8080"
+    networks:
+      - token-chat
+  chat:
+    image: chat
+    ports:
+      - "8777:8777"
+    networks:
+      - token-chat
+    depends_on:
+      - postgres
+
+  eureka:
+    image: eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - token-chat
+  postgres:
+    image: postgres:10.6-alpine
+    ports:
+      - 127.0.0.1:6432:5432
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=dREAM1cACAO
+    networks:
+      - token-chat

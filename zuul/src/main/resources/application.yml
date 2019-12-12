@@ -4,3 +4,10 @@ zuul:
     chat:
       path: /chat/**
       serviceId: chat
+      customSensitiveHeaders: true
+  ws:
+    brokerages:
+      chat:
+        end-points: /ws
+        brokers: /topic
+        destination-prefixes: /app
