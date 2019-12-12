@@ -24,7 +24,8 @@ import ru.itis.darzam.security.filter.JwtAuthenticationEntryPoint;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String TOKEN_PATH = "/auth";
-    private static final String[] PERMIT_ALL = {"/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**", TOKEN_PATH, "/api/chat/websocket/**"};
+    private static final String[] PERMIT_ALL = {"/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security",
+            "/swagger-ui.html", "/webjars/**", TOKEN_PATH, "/api/chat/websocket/**", "/hello"};
     public static final String JWT_TOKEN_HEADER_PARAM = "Authorization";
     private static final String SECURITY_PATH = "/api/chat/long-pooling";
 

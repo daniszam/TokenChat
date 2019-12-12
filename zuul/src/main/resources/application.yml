@@ -1,0 +1,6 @@
+zuul:
+  prefix: /api
+  routes:
+    chat:
+      path: /chat/**
+      serviceId: chat
